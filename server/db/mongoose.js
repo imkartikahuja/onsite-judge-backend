@@ -7,4 +7,4 @@ mongoose.connect('mongodb://localhost:27017/OnsiteJudge').then(() => {
   console.log('Error connecting to Mongo instance: ', err);
 });
 
-module.export = { mongoose };
+module.exports = { mongoose };

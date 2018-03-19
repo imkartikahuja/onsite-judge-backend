@@ -7,6 +7,10 @@ var Problem = mongoose.model('Problem', {
     minlength: 1,
     trim: true
   },
+  code : {
+    type: String,
+    unique: true
+  },
   mainText: {
     type: String,
     required: true,
@@ -31,6 +35,10 @@ var Problem = mongoose.model('Problem', {
     type: String,
     required: true,
     minlength: 1
+  },
+  time_limit: {
+    type: Number,
+    min: 0
   },
   _contestID: {
     type: mongoose.Schema.Types.ObjectId,

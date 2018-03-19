@@ -1,6 +1,18 @@
+const _ = require('lodash')
 const express = require('express');
+const bodyParser = require('body-parser');
+const {ObjectID} = require('mongodb');
+
+var {mongoose} = require('./db/mongoose');
+var {Contest} = require('./models/contest');
+var {Problem} = require('./models/problem');
+var {User} = require('./models/user');
+var {authenticate} = require('./middleware/authenticate');
+
 
 var app = express();
+
+app.use(bodyParser.json());
 
 //for logging request
 app.use((req,res,next) => {
@@ -9,6 +21,20 @@ app.use((req,res,next) => {
 
   console.log(log);
   next();
+});
+
+app.post('/contest', (req,res) => {
+  var contest = new Contest({
+    name: req.body.name,
+    startTime: req.body.startTime,
+    endTime: req.body.endTime
+  });
+
+  contest.save().then((result) => {
+    res.send(result);
+  }, (e) => {
+    res.status(400).send(e);
+  });
 });
 
 app.listen(3000, () => {

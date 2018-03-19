@@ -21,6 +21,11 @@ var UserSchema = new mongoose.Schema({
     required: true,
     minlength: 6
   },
+  admin: {
+    type: Number,
+    min: 0,
+    max: 1
+  },
   tokens: [{
     access: {
       type: String,

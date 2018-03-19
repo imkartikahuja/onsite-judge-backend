@@ -23,7 +23,7 @@ app.use((req,res,next) => {
   next();
 });
 
-app.post('/contest', (req,res) => {
+app.post('/contests', (req,res) => {
   var contest = new Contest({
     name: req.body.name,
     startTime: req.body.startTime,
@@ -32,6 +32,14 @@ app.post('/contest', (req,res) => {
 
   contest.save().then((result) => {
     res.send(result);
+  }, (e) => {
+    res.status(400).send(e);
+  });
+});
+
+app.get('/contests', (req,res) => {
+  Contest.find({}).then((contests) => {
+    res.send({contests});
   }, (e) => {
     res.status(400).send(e);
   });

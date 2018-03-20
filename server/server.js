@@ -45,6 +45,17 @@ app.get('/contests', (req,res) => {
   });
 });
 
+app.post('/problems', (req,res) => {
+  var body = _.pick(req.body, ['name'],['code'], ['mainText'],['input'],['output'],['constraints'],['example'],['time_limit'],['_contestID']);
+  var problem = new Problem(body);
+
+  problem.save().then((result) => {
+    res.send(result);
+  }, (e) => {
+    res.status(400).send(e);
+  });
+});
+
 app.post('/signup', async (req,res) => {
   try {
     var body = _.pick(req.body, ['email'],['password']);

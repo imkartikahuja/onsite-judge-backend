@@ -48,7 +48,7 @@ UserSchema.methods.toJSON = function () {     //to return only id n email else i
 UserSchema.methods.generateAuthToken = function () {
   var user = this;      //now we have access to doc which it is called on
   var access = 'auth';
-  var token = jwt.sign({_id: user._id.toHexString(),access}, process.env.JWT_SECRET).toString();
+  var token = jwt.sign({_id: user._id.toHexString(),access}, 'abc123').toString();
 
   // user.tokens.push({access,token});
   user.tokens = user.tokens.concat([{access,token}]);
@@ -75,7 +75,7 @@ UserSchema.statics.findByToken = function (token) {       //model method
   var decoded;
 
   try {
-      decoded = jwt.verify(token,process.env.JWT_SECRET);
+      decoded = jwt.verify(token,'abc123');
   } catch (e) {
       // return new Promise(function(resolve, reject) {
       //   reject();

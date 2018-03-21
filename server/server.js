@@ -56,6 +56,18 @@ app.post('/problems', (req,res) => {
   });
 });
 
+app.post('/problems/find', (req,res) => {
+  var id = req.body.id;
+
+  Problem.find({
+    _contestID : id
+  }).then((probs) => {
+    res.send({probs});
+  },(e) => {
+    res.send(400).send(e);
+  });
+});
+
 app.post('/signup', async (req,res) => {
   try {
     var body = _.pick(req.body, ['email'],['password']);

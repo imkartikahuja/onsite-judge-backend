@@ -96,6 +96,17 @@ app.post('/signup', async (req,res) => {
   }
 });
 
+app.post('/login', async (req,res) => {
+  try {
+    const body = _.pick(req.body, ['email'],['password']);
+    const user = await User.findByCredentials(body.email,body.password);
+    const token = await user.generateAuthToken();
+    res.header('x-auth',token).send(user);
+  } catch (e) {
+    res.status(400).send();
+  }
+});
+
 app.listen(3000, () => {
   console.log('Server is up on port 3000');
 });

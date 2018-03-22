@@ -1,6 +1,10 @@
 const mongoose = require('mongoose');
 
 var Submission = mongoose.model('Submission', {
+  code: {
+    type:String,
+    required: true
+  },
   _problemID : {
   type: mongoose.Schema.Types.ObjectId,
   required: true
@@ -20,3 +24,5 @@ var Submission = mongoose.model('Submission', {
     type: String
   }
 });
+
+module.exports = {Submission};

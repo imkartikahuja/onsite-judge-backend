@@ -7,6 +7,7 @@ var {mongoose} = require('./db/mongoose');
 var {Contest} = require('./models/contest');
 var {Problem} = require('./models/problem');
 var {User} = require('./models/user');
+var {Submission} require('./models/submission');
 var {authenticate} = require('./middleware/authenticate');
 
 
@@ -65,6 +66,21 @@ app.post('/problems/find', (req,res) => {
     res.send({probs});
   },(e) => {
     res.send(400).send(e);
+  });
+});
+
+app.post('/submit', (req,res) => {
+  var _problemID = req.body._problemID;
+  var _contestID = req.body._contestID;
+  var code = req.body.code;
+  var language = req.body.language;
+
+  var submission = new Submission({_problemID,_contestID,code,language});
+
+  submission.save().then((result) => {
+    res.send(result);
+  }, (e) => {
+    res.status(400).send(e);
   });
 });
 

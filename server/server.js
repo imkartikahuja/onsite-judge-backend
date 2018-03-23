@@ -59,7 +59,7 @@ app.post('/problems', (req,res) => {
 
 app.post('/problems/find', (req,res) => {
   var id = req.body.id;
-  
+
   Problem.find({
     _contestID : id
   }).then((probs) => {
@@ -69,18 +69,28 @@ app.post('/problems/find', (req,res) => {
   });
 });
 
-app.post('/submit', (req,res) => {
+app.post('/submit', authenticate ,(req,res) => {
   var _problemID = req.body._problemID;
   var _contestID = req.body._contestID;
   var code = req.body.code;
   var language = req.body.language;
-
-  var submission = new Submission({_problemID,_contestID,code,language});
+  var _userID = req.user._id;
+  var submission = new Submission({_problemID,_contestID, _userID,code,language});
 
   submission.save().then((result) => {
     res.send(result);
   }, (e) => {
     res.status(400).send(e);
+  });
+});
+
+app.get('/mysubmissions',authenticate ,(req,res) => {
+  var _userID = req.user._id;
+  
+  Submission.find({_userID}).then((result) => {
+    res.send({result});
+  } , (e) => {
+    res.status(404).send(e);
   });
 });
 

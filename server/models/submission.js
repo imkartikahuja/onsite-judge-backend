@@ -13,6 +13,10 @@ var Submission = mongoose.model('Submission', {
     type: mongoose.Schema.Types.ObjectId,
     required: true
   },
+  _userID : {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true
+  },
   time : {
     type : Date,
     default: Date.now

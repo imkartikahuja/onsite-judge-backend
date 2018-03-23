@@ -7,7 +7,7 @@ var {mongoose} = require('./db/mongoose');
 var {Contest} = require('./models/contest');
 var {Problem} = require('./models/problem');
 var {User} = require('./models/user');
-var {Submission} require('./models/submission');
+var {Submission} = require('./models/submission');
 var {authenticate} = require('./middleware/authenticate');
 
 
@@ -59,7 +59,7 @@ app.post('/problems', (req,res) => {
 
 app.post('/problems/find', (req,res) => {
   var id = req.body.id;
-
+  
   Problem.find({
     _contestID : id
   }).then((probs) => {

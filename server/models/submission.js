@@ -15,10 +15,10 @@ var Submission = mongoose.model('Submission', {
   },
   time : {
     type : Date,
-    default: new Date.now
+    default: Date.now
   },
   language : {
-    type: String,
+    type: String
   },
   status : {
     type: String

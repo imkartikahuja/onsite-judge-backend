@@ -2,6 +2,7 @@ const _ = require('lodash')
 const express = require('express');
 const bodyParser = require('body-parser');
 const {ObjectID} = require('mongodb');
+const cors = require('cors');
 
 var {mongoose} = require('./db/mongoose');
 var {Contest} = require('./models/contest');
@@ -14,6 +15,7 @@ var {authenticate} = require('./middleware/authenticate');
 var app = express();
 
 app.use(bodyParser.json());
+app.use(cors());
 
 //for logging request
 app.use((req,res,next) => {

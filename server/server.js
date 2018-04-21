@@ -84,11 +84,15 @@ app.post('/submit', authenticate ,(req,res) => {
   }, (e) => {
     res.status(400).send(e);
   });
+
+  if (language == 'cpp'){
+    
+  }
 });
 
 app.get('/mysubmissions',authenticate ,(req,res) => {
   var _userID = req.user._id;
-  
+
   Submission.find({_userID}).then((result) => {
     res.send({result});
   } , (e) => {

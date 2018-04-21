@@ -19,50 +19,49 @@ const compileCpp = (code,time_limit,userId) => {
       return;
     }
 
-    fs.writeFile('./compiler/code.cpp', code, (err) => {
+    fs.writeFile(`./tmp/${userId}/code.cpp`, code, (err) => {
       if (err) {console.log(err);throw err;}
 
       // success case, the file was saved
       console.log('Code saved!');
-    });
 
-    exec('g++ -o compiler/a.out compiler/code.cpp', (error, stdout, stderr) => {
-      if (error) {
-        console.error(`exec error: ${error}`);
-        return;
-      }
-
-      console.time('execute');
-      exec('compiler/./a.out < compiler/in.txt', defaults,(error, stdout, stderr) => {
+      //compile code
+      exec(`g++ -o tmp/${userId}/a.out tmp/${userId}/code.cpp`, (error, stdout, stderr) => {
         if (error) {
-          if(error.code == 139){
-            console.log('Segmentation fault');
-          } else if (error.signal == 'SIGTERM') {
-            console.log('Time limit exceeded');
-          }
           console.error(`exec error: ${error}`);
-          //console.log(error);
           return;
         }
-         //console.log(`stdout: ${stdout}`);
-        fs.writeFileSync('compiler/output.txt',stdout);
-        console.log(`stderr: ${stderr}`);
-        console.timeEnd('execute');
 
-        exec('cmp compiler/output.txt compiler/out.txt', (error, stdout, stderr) => {
+        console.time('execute');
+        exec(`tmp/${userId}/./a.out < tmp/${userId}/in.txt`, defaults,(error, stdout, stderr) => {
           if (error) {
-            console.error(`Wrong Answer`);
+            if(error.code == 139){
+              console.log('Segmentation fault');
+            } else if (error.signal == 'SIGTERM') {
+              console.log('Time limit exceeded');
+            }
+            console.error(`exec error: ${error}`);
+            //console.log(error);
             return;
           }
+           //console.log(`stdout: ${stdout}`);
+          fs.writeFileSync(`tmp/${userId}/output.txt`,stdout);
+          console.log(`stderr: ${stderr}`);
+          console.timeEnd('execute');
 
-          console.log('Correct Answer');
+          exec(`cmp tmp/${userId}/output.txt tmp/${userId}/out.txt`, (error, stdout, stderr) => {
+            if (error) {
+              console.error(`Wrong Answer`);
+              return;
+            }
+
+            console.log('Correct Answer');
+          });
+
         });
 
       });
-
     });
-
-
   });
 
 

@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const moment = require('moment');
 
 var Submission = mongoose.model('Submission', {
   code: {
@@ -19,7 +20,7 @@ var Submission = mongoose.model('Submission', {
   },
   time : {
     type : Date,
-    default: Date.now
+    default: moment()
   },
   language : {
     type: String

@@ -1,5 +1,6 @@
 const fs = require('fs');
 const { exec } = require('child_process');
+const moment = require('moment');
 
 const compileCpp = (code,time_limit,userId) => {
   const defaults = {
@@ -17,12 +18,28 @@ const compileCpp = (code,time_limit,userId) => {
   exec(`mkdir ./tmp/${userId}`,(error, stdout, stderr) => {
     if (error) {
       console.error(`exec error: ${error}`);
-      return;
+      exec(`rm -rf ./tmp/${userId}`,(error, stdout, stderr) => {
+        if (error) {
+          console.error(`exec error: ${error}`);
+          return error;
+        }
+        console.log(`${userId} folder deleted`);
+      });
+      return error;
     }
     console.log(`${userId} folder created`);
 
     fs.writeFile(`./tmp/${userId}/code.cpp`, code, (err) => {
-      if (err) {console.log(err);throw err;}
+      if (err) {console.log(err);
+        exec(`rm -rf ./tmp/${userId}`,(error, stdout, stderr) => {
+        if (error) {
+          console.error(`exec error: ${error}`);
+          return error;
+        }
+        console.log(`${userId} folder deleted`);
+      });
+      return err;
+    }
 
       // success case, the file was saved
       console.log('Code saved!');
@@ -34,20 +51,37 @@ const compileCpp = (code,time_limit,userId) => {
           exec(`rm -rf ./tmp/${userId}`,(error, stdout, stderr) => {
             if (error) {
               console.error(`exec error: ${error}`);
-              return;
+              return error;
             }
             console.log(`${userId} folder deleted`);
           });
-          return;
+          return error;
         }
 
         console.time('execute');
+        var start = moment().valueOf();
         exec(`tmp/${userId}/./a.out < compiler/in.txt`, defaults,(error, stdout, stderr) => {
           if (error) {
             if(error.code == 139){
               console.log('Segmentation fault');
+              exec(`rm -rf ./tmp/${userId}`,(error, stdout, stderr) => {
+                if (error) {
+                  console.error(`exec error: ${error}`);
+                  return error;
+                }
+                console.log(`${userId} folder deleted`);
+              });
+              return 'Segmentation fault';
             } else if (error.signal == 'SIGTERM') {
               console.log('Time limit exceeded');
+              exec(`rm -rf ./tmp/${userId}`,(error, stdout, stderr) => {
+                if (error) {
+                  console.error(`exec error: ${error}`);
+                  return error;
+                }
+                console.log(`${userId} folder deleted`);
+              });
+              return 'TLE';
             }
             console.error(`exec error: ${error}`);
             //console.log(error);
@@ -58,12 +92,22 @@ const compileCpp = (code,time_limit,userId) => {
               }
               console.log(`${userId} folder deleted`);
             });
-            return;
+            return error;
           }
            //console.log(`stdout: ${stdout}`);
+           var time;
+           time = console.timeEnd('execute');
+
+          var end = moment().valueOf();
+          // time = end.diff(start,'ms');
+          time = (end - start);
+           console.log('time:',time);
+
+
+
           fs.writeFileSync(`tmp/${userId}/output.txt`,stdout);
           console.log(`stderr: ${stderr}`);
-          console.timeEnd('execute');
+
 
           exec(`cmp tmp/${userId}/output.txt compiler/out.txt`, (error, stdout, stderr) => {
             if (error) {
@@ -71,11 +115,11 @@ const compileCpp = (code,time_limit,userId) => {
               exec(`rm -rf ./tmp/${userId}`,(error, stdout, stderr) => {
                 if (error) {
                   console.error(`exec error: ${error}`);
-                  return;
+                  return error;
                 }
                 console.log(`${userId} folder deleted`);
               });
-              return;
+              return 'Wrong Answer';
             }
 
             console.log('Correct Answer');
@@ -83,10 +127,11 @@ const compileCpp = (code,time_limit,userId) => {
             exec(`rm -rf ./tmp/${userId}`,(error, stdout, stderr) => {
               if (error) {
                 console.error(`exec error: ${error}`);
-                return;
+                return error;
               }
               console.log(`${userId} folder deleted`);
             });
+            return `Correct Answer ${time}`;
           });
 
         });

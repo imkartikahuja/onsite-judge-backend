@@ -3,6 +3,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const {ObjectID} = require('mongodb');
 const cors = require('cors');
+const moment = require('moment');
 
 var {mongoose} = require('./db/mongoose');
 var {Contest} = require('./models/contest');
@@ -79,6 +80,15 @@ app.post('/submit', authenticate ,(req,res) => {
   var _userID = req.user._id;
   var submission = new Submission({_problemID,_contestID, _userID,code,language});
 
+  var time_limit;
+  Problem.findOne({
+    _id: _problemID
+  }).then((prob) => {
+    time_limit = prob.time_limit;
+  });
+
+  
+
   submission.save().then((result) => {
     res.send(result);
   }, (e) => {
@@ -86,7 +96,7 @@ app.post('/submit', authenticate ,(req,res) => {
   });
 
   if (language == 'cpp'){
-    
+
   }
 });
 

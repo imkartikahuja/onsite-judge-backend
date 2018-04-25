@@ -10,8 +10,9 @@ var {Contest} = require('./models/contest');
 var {Problem} = require('./models/problem');
 var {User} = require('./models/user');
 var {Submission} = require('./models/submission');
+var {Ranking} = require('./models/ranking');
 var {authenticate} = require('./middleware/authenticate');
-
+var {compileCpp} = require('./compiler/cpp.js');
 
 var app = express();
 
@@ -72,13 +73,13 @@ app.post('/problems/find', (req,res) => {
   });
 });
 
-app.post('/submit', authenticate ,(req,res) => {
+app.post('/submit', authenticate , (req,res) => {
   var _problemID = req.body._problemID;
   var _contestID = req.body._contestID;
   var code = req.body.code;
   var language = req.body.language;
   var _userID = req.user._id;
-  var submission = new Submission({_problemID,_contestID, _userID,code,language});
+  var submission;
 
   var time_limit;
   Problem.findOne({
@@ -87,17 +88,28 @@ app.post('/submit', authenticate ,(req,res) => {
     time_limit = prob.time_limit;
   });
 
-  
-
-  submission.save().then((result) => {
-    res.send(result);
-  }, (e) => {
-    res.status(400).send(e);
-  });
-
+  var status;
   if (language == 'cpp'){
-
+    compileCpp(code,1200,_userID,(data) => {
+      status = data;
+      // console.log('DATA',status);
+      submission = new Submission({_problemID,_contestID, _userID,code,language, status});
+      submission.save().then((result) => {
+        res.send(status);
+      }, (e) => {
+        res.status(400).send(e);
+      });
+    });
   }
+
+
+  // submission.save().then((result) => {
+  //   res.send(result);
+  // }, (e) => {
+  //   res.status(400).send(e);
+  // });
+  //
+
 });
 
 app.get('/mysubmissions',authenticate ,(req,res) => {

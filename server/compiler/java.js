@@ -2,7 +2,7 @@ const fs = require('fs');
 const { exec } = require('child_process');
 const moment = require('moment');
 
-const compileCpp = (code,time_limit,userId, cb) => {
+const compileJava = (code,time_limit,userId, cb) => {
   const defaults = {
     encoding: 'utf8',
     timeout: time_limit,
@@ -29,7 +29,7 @@ const compileCpp = (code,time_limit,userId, cb) => {
     }
     console.log(`${userId} folder created`);
 
-  fs.writeFile(`./tmp/${userId}/code.cpp`, code, (err) => {
+  fs.writeFile(`./tmp/${userId}/code.java`, code, (err) => {
         if (err) {console.log(err);
    exec(`rm -rf ./tmp/${userId}`,(error, stdout, stderr) => {
         if (error) {
@@ -45,7 +45,7 @@ const compileCpp = (code,time_limit,userId, cb) => {
       console.log('Code saved!');
 
       //compile code
-    exec(`g++ -o tmp/${userId}/a.out tmp/${userId}/code.cpp`, (error, stdout, stderr) => {
+    exec(`javac tmp/${userId}/code.java`, (error, stdout, stderr) => {
         if (error) {
           console.error(`exec error: ${error}`);
           exec(`rm -rf ./tmp/${userId}`,(error, stdout, stderr) => {
@@ -60,7 +60,7 @@ const compileCpp = (code,time_limit,userId, cb) => {
 
         console.time('execute');
         var start = moment().valueOf();
-      exec(`tmp/${userId}/./a.out < compiler/in.txt`, defaults,(error, stdout, stderr) => {
+      exec(`tmp/${userId}/java Main < compiler/in.txt`, defaults,(error, stdout, stderr) => {
           if (error) {
             if(error.code == 139){
               console.log('Segmentation fault');
@@ -144,27 +144,27 @@ const compileCpp = (code,time_limit,userId, cb) => {
 
 }
 
-module.exports = {compileCpp};
+module.exports = {compileJava};
 
 
-// compileCpp(`#include<bits/stdc++.h>
-// using namespace std;
-// #define pb push_back
-// typedef vector<int> vi;
-// typedef long long int ll;
-//
-// int main()
-// {
-//     //int arr[10000000000];
-//     ll t;
-//     cin>>t;
-//     while(t--)
-//     {
-//         cout<<"Hello World!\\n";
-//     }
-//     return 0;
-// }
-// `,1000);
+compileJava(`import java.util.*;
+class Main
+{
+public static void main(String args[])
+{
+int n;
+Scanner sc=new Scanner(System.in);
+n=sc.nextInt();
+for(int i=n;i>=0;i--)
+{
+System.out.println("Hello World!");
+}
+}
+}
+`,1000,121454,(data) => {
+
+  console.log('DATA',data);
+});
 
 // compileCpp(`#include<bits/stdc++.h>
 // using namespace std;

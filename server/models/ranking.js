@@ -13,10 +13,13 @@ var Ranking = mongoose.model('Ranking',{
     type: Number
   },
   time : {
-    type : Date,
-    default: moment()
+    type : Date
   },
   problems: [{
+    _problemID: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true
+    },
     problemName: {
       type: String,
       required: true

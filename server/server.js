@@ -89,13 +89,38 @@ app.post('/submit', authenticate , (req,res) => {
   });
 
   var status;
+  var problems = [];
   if (language == 'cpp'){
     compileCpp(code,1200,_userID,(data) => {
       status = data;
-      // console.log('DATA',status);
+
       submission = new Submission({_problemID,_contestID, _userID,code,language, status});
       submission.save().then((result) => {
         res.send(status);
+
+        Ranking.find({_userID}).then((data) => {
+          if (data.length === 0) {
+            //update ranking
+            Problem.find({_contestID}).then((probs) => {
+
+              for(var i=0;i<probs.length;i++)
+              {
+                if (probs[i]._id == _problemID){
+                  if(status == 'Wrong Answer')
+                  {
+                    problems.push({_problemID: probs[i]._id,problemName: probs[i].name,correctSubmission:0,wrongSubmission: 1 });
+                  } else if (status.includes('Correct Answer')) {
+                    problems.push({_problemID: probs[i]._id,problemName: probs[i].name,correctSubmission:1,wrongSubmission: 0 });
+                  }
+                } else {
+                  problems.push({_problemID: probs[i]._id,problemName: probs[i].name,correctSubmission:0,wrongSubmission: 0 });
+                }
+              }
+              console.log(problems);
+            });
+          }
+        }).catch((e) => {console.log('fdfdfd');});
+
       }, (e) => {
         res.status(400).send(e);
       });

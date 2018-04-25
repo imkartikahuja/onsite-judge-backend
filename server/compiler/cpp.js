@@ -47,7 +47,8 @@ const compileCpp = (code,time_limit,userId, cb) => {
       //compile code
     exec(`g++ -o tmp/${userId}/a.out tmp/${userId}/code.cpp`, (error, stdout, stderr) => {
         if (error) {
-          console.error(`exec error: ${error}`);
+           console.error(`exec error: ${error}`);
+
           exec(`rm -rf ./tmp/${userId}`,(error, stdout, stderr) => {
             if (error) {
               console.error(`exec error: ${error}`);
@@ -55,7 +56,7 @@ const compileCpp = (code,time_limit,userId, cb) => {
             }
             console.log(`${userId} folder deleted`);
           });
-          return cb(error);
+          return cb('Compilation Error');
         }
 
         console.time('execute');

@@ -98,7 +98,7 @@ app.post('/submit', authenticate , (req,res) => {
       submission.save().then((result) => {
         res.send(status);
 
-        Ranking.find({_userID}).then((data) => {
+        Ranking.findOne({_userID,_contestID}).then((data) => {
           if (data.length === 0) {
             //update ranking
             Problem.find({_contestID}).then((probs) => {
@@ -106,20 +106,84 @@ app.post('/submit', authenticate , (req,res) => {
               for(var i=0;i<probs.length;i++)
               {
                 if (probs[i]._id == _problemID){
-                  if(status == 'Wrong Answer')
-                  {
-                    problems.push({_problemID: probs[i]._id,problemName: probs[i].name,correctSubmission:0,wrongSubmission: 1 });
-                  } else if (status.includes('Correct Answer')) {
+                 if (status.includes('Correct Answer')) {
                     problems.push({_problemID: probs[i]._id,problemName: probs[i].name,correctSubmission:1,wrongSubmission: 0 });
+                  }
+                  else {
+                    problems.push({_problemID: probs[i]._id,problemName: probs[i].name,correctSubmission:0,wrongSubmission: 1 });
                   }
                 } else {
                   problems.push({_problemID: probs[i]._id,problemName: probs[i].name,correctSubmission:0,wrongSubmission: 0 });
                 }
               }
-              console.log(problems);
+              // console.log(problems);
+
+              var wa=0,ca=0;
+              for(var i=0;i<problems.length;i++){
+                if(problems[i].correctSubmission) ca += 1;
+                else if (problems[i].wrongSubmission) {
+                  wa += problems[i].wrongSubmission;
+                }
+              }
+              var time = moment().add(20 * wa,'m');
+              // console.log(time);
+              ranking = new Ranking({
+                _userID,
+                _contestID,
+                score: ca,
+                time,
+                problems
+              });
+              ranking.save().then((res) => {console.log(res);})
             });
           }
-        }).catch((e) => {console.log('fdfdfd');});
+          else {
+            //User already in ranking table
+             problems = [];
+              var updateTime = false;
+              console.log(data.time);
+              for(var i=0;i<data.problems.length;i++)
+              {
+                if (data.problems[i]._problemID == _problemID){
+                 if (status.includes('Correct Answer')) {
+                   if (data.problems[i].correctSubmission == 0){
+                     updateTime = true;
+                      problems.push({_problemID: data.problems[i]._problemID,problemName: data.problems[i].problemName,correctSubmission:1,wrongSubmission: data.problems[i].wrongSubmission });
+                   } else {
+                     problems.push({_problemID: data.problems[i]._problemID,problemName: data.problems[i].problemName,correctSubmission:data.problems[i].correctSubmission,wrongSubmission: data.problems[i].wrongSubmission });
+                   }
+                  }
+                  else {
+                    if(data.problems[i].correctSubmission == 0)
+                      problems.push({_problemID: data.problems[i]._problemID,problemName: data.problems[i].problemName,correctSubmission:data.problems[i].correctSubmission,wrongSubmission: data.problems[i].wrongSubmission + 1 });
+                    else {
+                      problems.push({_problemID: data.problems[i]._problemID,problemName: data.problems[i].problemName,correctSubmission:data.problems[i].correctSubmission,wrongSubmission: data.problems[i].wrongSubmission });
+                    }
+                  }
+                } else {
+                  problems.push({_problemID: data.problems[i]._problemID,problemName: data.problems[i].problemName,correctSubmission:data.problems[i].correctSubmission,wrongSubmission: data.problems[i].wrongSubmission });
+                }
+              }
+              var wa=0,ca=0,time,score;
+              for(var i=0;i<problems.length;i++){
+                if(problems[i].correctSubmission) ca += 1;
+                else if (problems[i].wrongSubmission) {
+                  wa += problems[i].wrongSubmission;
+                }
+              }
+              if(updateTime)
+                time = moment().add(20 * wa,'m');
+              else {
+                  time = data.time;
+                }
+                score = ca;
+
+                Ranking.update({_userID,_contestID}, {$set: {score,time,problems}}).then((res) => {
+                  console.log('Rank List updated');
+                });
+
+          }
+        }).catch((e) => {console.log(e);});
 
       }, (e) => {
         res.status(400).send(e);

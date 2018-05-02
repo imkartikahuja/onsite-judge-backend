@@ -132,7 +132,7 @@ const compileCpp = (code,time_limit,userId, cb) => {
               }
               console.log(`${userId} folder deleted`);
             });
-            return cb(`Correct Answer ${time}`);
+            return cb(`Correct Answer ${time} msec`);
           });
 
         });

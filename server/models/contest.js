@@ -7,11 +7,11 @@ var Contest = mongoose.model('Contest',{
     minlength: 1
   },
   startTime: {
-    type: Number,
+    type: String,
     required: true,
   },
   endTime: {
-    type: Number,
+    type: String,
     required: true,
   }
 });

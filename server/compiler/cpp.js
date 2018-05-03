@@ -2,7 +2,7 @@ const fs = require('fs');
 const { exec } = require('child_process');
 const moment = require('moment');
 
-const compileCpp = (code,time_limit,userId, cb) => {
+const compileCpp = (code,time_limit,userId, problemCode,contestName ,cb) => {
   const defaults = {
     encoding: 'utf8',
     timeout: time_limit,
@@ -61,7 +61,7 @@ const compileCpp = (code,time_limit,userId, cb) => {
 
         console.time('execute');
         var start = moment().valueOf();
-      exec(`tmp/${userId}/./a.out < compiler/in.txt`, defaults,(error, stdout, stderr) => {
+      exec(`tmp/${userId}/./a.out < contests/${contestName}/${problemCode}/in.txt`, defaults,(error, stdout, stderr) => {
           if (error) {
             if(error.code == 139){
               console.log('Segmentation fault');
@@ -110,7 +110,7 @@ const compileCpp = (code,time_limit,userId, cb) => {
           console.log(`stderr: ${stderr}`);
 
 
-        exec(`cmp tmp/${userId}/output.txt compiler/out.txt`, (error, stdout, stderr) => {
+        exec(`cmp tmp/${userId}/output.txt contests/${contestName}/${problemCode}/out.txt`, (error, stdout, stderr) => {
             if (error) {
               console.error(`Wrong Answer`);
               exec(`rm -rf ./tmp/${userId}`,(error, stdout, stderr) => {

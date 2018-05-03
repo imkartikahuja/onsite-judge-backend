@@ -89,7 +89,7 @@ app.post('/problems/find', (req,res) => {
   }).then((probs) => {
     res.send({probs});
   },(e) => {
-    res.send(400).send(e);
+    res.status(400).send(e);
   });
 });
 
@@ -101,16 +101,25 @@ app.post('/submit', authenticate , (req,res) => {
   var _userID = req.user._id;
   var submission;
   var time_limit;
+  var contestName;
+  var problemCode;
   Problem.findOne({
     _id: _problemID
   }).then((prob) => {
     time_limit = prob.time_limit*1000;  //for msec
+    problemCode = prob.code;
+    Contest.findOne({
+      _id: _contestID
+    }).then((contest) => {
+      contestName = contest.name;
+
+      console.log('PROBLEM CODE ',problemCode,' CONTEST NAME ',contestName);
 
       var status;
       var problems = [];
       if (language == 'cpp'){
         console.log('time_limit -> ',time_limit);
-        compileCpp(code,time_limit,_userID,(data) => {
+        compileCpp(code,time_limit,_userID,problemCode,contestName,(data) => {
           status = data;
 
           submission = new Submission({_problemID,_contestID, _userID,code,language, status});
@@ -210,6 +219,9 @@ app.post('/submit', authenticate , (req,res) => {
           });
         });
       }
+    }).catch((e) => {
+      res.status(400).send('Invalid Contest/Problem');
+    })
   });
 
 

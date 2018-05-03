@@ -13,6 +13,7 @@ var {Submission} = require('./models/submission');
 var {Ranking} = require('./models/ranking');
 var {authenticate} = require('./middleware/authenticate');
 var {compileCpp} = require('./compiler/cpp.js');
+var {compileJava} = require('./compiler/java.js')
 
 var app = express();
 
@@ -117,7 +118,7 @@ app.post('/submit', authenticate , (req,res) => {
 
       var status;
       var problems = [];
-      if (language == 'cpp'){
+      if (language == 'C++'){
         console.log('time_limit -> ',time_limit);
         compileCpp(code,time_limit,_userID,problemCode,contestName,(data) => {
           status = data;
@@ -219,10 +220,113 @@ app.post('/submit', authenticate , (req,res) => {
           });
         });
       }
+      else if (language == 'Java') {
+        console.log('time_limit -> ',time_limit);
+        compileJava(code,time_limit*20,_userID,problemCode,contestName,(data) => {
+          status = data;
+
+          submission = new Submission({_problemID,_contestID, _userID,code,language, status});
+          submission.save().then((result) => {
+            res.send(status);
+
+            Ranking.findOne({_userID,_contestID}).then((data) => {
+              if (!data) {
+                //update ranking
+                Problem.find({_contestID}).then((probs) => {
+
+                  for(var i=0;i<probs.length;i++)
+                  {
+                    if (probs[i]._id == _problemID){
+                     if (status.includes('Correct Answer')) {
+                        problems.push({_problemID: probs[i]._id,problemName: probs[i].name,correctSubmission:1,wrongSubmission: 0 });
+                      }
+                      else {
+                        problems.push({_problemID: probs[i]._id,problemName: probs[i].name,correctSubmission:0,wrongSubmission: 1 });
+                      }
+                    } else {
+                      problems.push({_problemID: probs[i]._id,problemName: probs[i].name,correctSubmission:0,wrongSubmission: 0 });
+                    }
+                  }
+                  // console.log(problems);
+
+                  var wa=0,ca=0;
+                  for(var i=0;i<problems.length;i++){
+                    if(problems[i].correctSubmission) ca += 1;
+                    else if (problems[i].wrongSubmission) {
+                      wa += problems[i].wrongSubmission;
+                    }
+                  }
+                  var time = moment().add(20 * wa,'m');
+                  // console.log(time);
+                  ranking = new Ranking({
+                    _userID,
+                    _contestID,
+                    score: ca,
+                    time,
+                    problems
+                  });
+                  ranking.save().then((res) => {console.log(res);})
+                });
+              }
+              else {
+                //User already in ranking table
+                 problems = [];
+                  var updateTime = false;
+                  console.log(data.time);
+                  for(var i=0;i<data.problems.length;i++)
+                  {
+                    if (data.problems[i]._problemID == _problemID){
+                     if (status.includes('Correct Answer')) {
+                       if (data.problems[i].correctSubmission == 0){
+                         updateTime = true;
+                          problems.push({_problemID: data.problems[i]._problemID,problemName: data.problems[i].problemName,correctSubmission:1,wrongSubmission: data.problems[i].wrongSubmission });
+                       } else {
+                         problems.push({_problemID: data.problems[i]._problemID,problemName: data.problems[i].problemName,correctSubmission:data.problems[i].correctSubmission,wrongSubmission: data.problems[i].wrongSubmission });
+                       }
+                      }
+                      else {
+                        if(data.problems[i].correctSubmission == 0)
+                          problems.push({_problemID: data.problems[i]._problemID,problemName: data.problems[i].problemName,correctSubmission:data.problems[i].correctSubmission,wrongSubmission: data.problems[i].wrongSubmission + 1 });
+                        else {
+                          problems.push({_problemID: data.problems[i]._problemID,problemName: data.problems[i].problemName,correctSubmission:data.problems[i].correctSubmission,wrongSubmission: data.problems[i].wrongSubmission });
+                        }
+                      }
+                    } else {
+                      problems.push({_problemID: data.problems[i]._problemID,problemName: data.problems[i].problemName,correctSubmission:data.problems[i].correctSubmission,wrongSubmission: data.problems[i].wrongSubmission });
+                    }
+                  }
+                  var wa=0,ca=0,time,score;
+                  for(var i=0;i<problems.length;i++){
+                    if(problems[i].correctSubmission) ca += 1;
+                    if (problems[i].wrongSubmission) {
+                      wa += problems[i].wrongSubmission;
+                    }
+                  }
+                  if(updateTime){
+                    time = moment().add(20 * wa,'m');
+                  }
+                  else {
+                      time = data.time;
+                    }
+                    score = ca;
+                    console.log(time);
+                    Ranking.update({_userID,_contestID}, {$set: {score,time,problems}}).then((res) => {
+                      console.log('Rank List updated');
+                    });
+
+              }
+            }).catch((e) => {console.log(e);});
+
+          }, (e) => {
+            res.status(400).send(e);
+          });
+        });
+      }
     }).catch((e) => {
-      res.status(400).send('Invalid Contest/Problem');
+      res.status(400).send('Invalid Contest');
     })
-  });
+  }).catch((e) => {
+    res.status(400).send('Invalid Problem');})
 
 
 

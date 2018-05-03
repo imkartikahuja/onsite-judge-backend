@@ -2,7 +2,7 @@ const fs = require('fs');
 const { exec } = require('child_process');
 const moment = require('moment');
 
-const compileJava = (code,time_limit,userId, cb) => {
+const compileJava = (code,time_limit,userId, problemCode,contestName, cb) => {
   const defaults = {
     encoding: 'utf8',
     timeout: time_limit,
@@ -60,7 +60,7 @@ const compileJava = (code,time_limit,userId, cb) => {
 
         console.time('execute');
         var start = moment().valueOf();
-      exec(`tmp/${userId}/java Main < compiler/in.txt`, defaults,(error, stdout, stderr) => {
+      exec(`cd tmp/${userId} && java Main < ./../../contests/${contestName}/${problemCode}/in.txt`, defaults,(error, stdout, stderr) => {
           if (error) {
             if(error.code == 139){
               console.log('Segmentation fault');
@@ -109,7 +109,7 @@ const compileJava = (code,time_limit,userId, cb) => {
           console.log(`stderr: ${stderr}`);
 
 
-        exec(`cmp tmp/${userId}/output.txt compiler/out.txt`, (error, stdout, stderr) => {
+        exec(`cmp tmp/${userId}/output.txt contests/${contestName}/${problemCode}/out.txt`, (error, stdout, stderr) => {
             if (error) {
               console.error(`Wrong Answer`);
               exec(`rm -rf ./tmp/${userId}`,(error, stdout, stderr) => {
@@ -131,7 +131,7 @@ const compileJava = (code,time_limit,userId, cb) => {
               }
               console.log(`${userId} folder deleted`);
             });
-            return cb(`Correct Answer ${time}`);
+            return cb(`Correct Answer ${time} msec`);
           });
 
         });
@@ -147,24 +147,24 @@ const compileJava = (code,time_limit,userId, cb) => {
 module.exports = {compileJava};
 
 
-compileJava(`import java.util.*;
-class Main
-{
-public static void main(String args[])
-{
-int n;
-Scanner sc=new Scanner(System.in);
-n=sc.nextInt();
-for(int i=n;i>=0;i--)
-{
-System.out.println("Hello World!");
-}
-}
-}
-`,1000,121454,(data) => {
-
-  console.log('DATA',data);
-});
+// compileJava(`import java.util.*;
+// class Main
+// {
+// public static void main(String args[])
+// {
+// int n;
+// Scanner sc=new Scanner(System.in);
+// n=sc.nextInt();
+// for(int i=n;i>=0;i--)
+// {
+// System.out.println("Hello World!");
+// }
+// }
+// }
+// `,1000,121454,(data) => {
+//
+//   console.log('DATA',data);
+// });
 
 // compileCpp(`#include<bits/stdc++.h>
 // using namespace std;

@@ -51,7 +51,7 @@ UserSchema.methods.toJSON = function () {     //to return only id n email else i
   var user = this;
   var userObject = user.toObject();
 
-  return _.pick(userObject,['_id','email']);
+  return _.pick(userObject,['_id','email','name']);
 };
 
 UserSchema.methods.generateAuthToken = function () {

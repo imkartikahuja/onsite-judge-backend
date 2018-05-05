@@ -23,8 +23,8 @@ app.use(cors());
 app.use(function (req, res, next) {
 
     // Website you wish to allow to connect
-    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:4200');
-    // res.setHeader('Access-Control-Allow-Origin', 'http://192.168.43.189:4200');
+    // res.setHeader('Access-Control-Allow-Origin', 'http://localhost:4200');
+    res.setHeader('Access-Control-Allow-Origin', 'http://172.16.153.0:4200');
 
     // Request methods you wish to allow
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
@@ -221,8 +221,9 @@ app.post('/submit', authenticate , (req,res) => {
         });
       }
       else if (language == 'Java') {
+        time_limit *= 20;
         console.log('time_limit -> ',time_limit);
-        compileJava(code,time_limit*20,_userID,problemCode,contestName,(data) => {
+        compileJava(code,time_limit,_userID,problemCode,contestName,(data) => {
           status = data;
 
           submission = new Submission({_problemID,_contestID, _userID,code,language, status});
@@ -373,6 +374,6 @@ app.post('/login', async (req,res) => {
   }
 });
 
-app.listen(3000,/* '192.168.43.189',*/() => {
+app.listen(3000, '172.16.153.0',() => {
   console.log('Server is up on port 3000');
 });

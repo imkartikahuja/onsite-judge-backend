@@ -23,8 +23,8 @@ app.use(cors());
 app.use(function (req, res, next) {
 
     // Website you wish to allow to connect
-    // res.setHeader('Access-Control-Allow-Origin', 'http://localhost:4200');
-    res.setHeader('Access-Control-Allow-Origin', 'http://172.16.153.0:4200');
+    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:4200');
+    // res.setHeader('Access-Control-Allow-Origin', 'http://172.16.153.0:4200');
 
     // Request methods you wish to allow
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
@@ -374,6 +374,6 @@ app.post('/login', async (req,res) => {
   }
 });
 
-app.listen(3000, '172.16.153.0',() => {
+app.listen(3000, /*'172.16.153.0',*/() => {
   console.log('Server is up on port 3000');
 });
